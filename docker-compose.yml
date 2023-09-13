@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  dynamodb:
+    container_name: dynamodb
+    command: -jar DynamoDBLocal.jar -sharedDb -dbPath . -optimizeDbBeforeStartup
+    build: ./env/db
+    volumes:
+      - dynamodb:/home/dynamodblocal
+    ports:
+      - 8000:8000
+    networks:
+      - rust-net
+  app:
+    container_name: rust-app
+    build: ./env/rust
+    tty: true
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    volumes:
+      - ./app:/app
+      - rust-packages:/root/.cargo/registry
+    networks:
+      - rust-net
+
+networks:
+  rust-net:
+    driver: bridge
+
+volumes:
+  dynamodb:
+    driver: local
+  rust-packages:
+    driver: local
